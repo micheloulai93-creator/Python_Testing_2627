@@ -31,3 +31,11 @@ def test_achat_accepte_si_points_exactement_suffisants(client):
     reponse = acheter(client, "Iron Temple", "Spring Festival", 4)
     assert b"Great-booking complete!" in reponse.data
     assert server.get_club_by_name("Iron Temple")["points"] == 0
+
+
+def test_achat_refuse_plus_de_12_places(client):
+    # Simply Lift a 13 points : assez pour 13 places, mais la limite est de 12
+    reponse = acheter(client, "Simply Lift", "Spring Festival", 13)
+    assert b"more than 12" in reponse.data
+    assert server.get_club_by_name("Simply Lift")["points"] == "13"
+    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"

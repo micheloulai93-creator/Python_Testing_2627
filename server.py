@@ -20,6 +20,8 @@ app.secret_key = 'something_special'
 competitions = loadCompetitions()
 clubs = loadClubs()
 
+MAX_PLACES_PER_CLUB = 12
+
 
 def get_club_by_email(email):
     """Retourne le club correspondant à l'email, ou None s'il n'existe pas."""
@@ -41,6 +43,8 @@ def validate_booking(club, competition, places_required):
 
     Retourne un message d'erreur (str) si elle est refusée, sinon None.
     """
+    if places_required > MAX_PLACES_PER_CLUB:
+        return "You cannot book more than 12 places in a competition."
     if places_required > int(club['points']):
         return "Not enough points to book that many places."
     return None
