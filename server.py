@@ -20,13 +20,22 @@ app.secret_key = 'something_special'
 competitions = loadCompetitions()
 clubs = loadClubs()
 
+
+def get_club_by_email(email):
+    """Retourne le club correspondant à l'email, ou None s'il n'existe pas."""
+    return next((c for c in clubs if c['email'] == email), None)
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
+    club = get_club_by_email(request.form.get('email', ''))
+    if club is None:
+        flash("Sorry, that email was not found.")
+        return redirect(url_for('index'))
     return render_template('welcome.html',club=club,competitions=competitions)
 
 
