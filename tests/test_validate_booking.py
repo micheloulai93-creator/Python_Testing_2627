@@ -23,3 +23,15 @@ def test_13_places_refuse_meme_avec_assez_de_points():
 
 def test_12_places_autorise():
     assert server.validate_booking(club(20), competition(30), 12) is None
+
+
+def test_plus_de_places_que_disponible_refuse():
+    assert "Not enough places" in server.validate_booking(club(12), competition(3), 5)
+
+
+def test_competition_complete_refusee():
+    assert "full" in server.validate_booking(club(12), competition(0), 1)
+
+
+def test_exactement_les_places_restantes_autorise():
+    assert server.validate_booking(club(12), competition(3), 3) is None
