@@ -15,3 +15,11 @@ def test_points_suffisants_autorise():
 
 def test_points_insuffisants_refuse():
     assert "Not enough points" in server.validate_booking(club(4), competition(20), 5)
+
+
+def test_13_places_refuse_meme_avec_assez_de_points():
+    assert "more than 12" in server.validate_booking(club(20), competition(30), 13)
+
+
+def test_12_places_autorise():
+    assert server.validate_booking(club(20), competition(30), 12) is None
