@@ -36,6 +36,16 @@ def get_competition_by_name(name):
     return next((c for c in competitions if c['name'] == name), None)
 
 
+def validate_booking(club, competition, places_required):
+    """Vérifie qu'une réservation est autorisée.
+
+    Retourne un message d'erreur (str) si elle est refusée, sinon None.
+    """
+    if places_required > int(club['points']):
+        return "Not enough points to book that many places."
+    return None
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -67,6 +77,10 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
+    error = validate_booking(club, competition, placesRequired)
+    if error:
+        flash(error)
+        return render_template('welcome.html', club=club, competitions=competitions)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     club['points'] = int(club['points'])-placesRequired
     flash('Great-booking complete!')

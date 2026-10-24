@@ -17,3 +17,17 @@ def test_achat_deduit_les_points_du_club(client):
     reponse = acheter(client, "Simply Lift", "Spring Festival", 3)
     assert int(server.get_club_by_name("Simply Lift")["points"]) == points_avant - 3
     assert ("Points available: %d" % (points_avant - 3)).encode() in reponse.data
+    
+
+
+def test_achat_refuse_si_points_insuffisants(client):
+    reponse = acheter(client, "Iron Temple", "Spring Festival", 5)  # 4 points seulement
+    assert b"Not enough points" in reponse.data
+    assert server.get_club_by_name("Iron Temple")["points"] == "4"
+    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+
+
+def test_achat_accepte_si_points_exactement_suffisants(client):
+    reponse = acheter(client, "Iron Temple", "Spring Festival", 4)
+    assert b"Great-booking complete!" in reponse.data
+    assert server.get_club_by_name("Iron Temple")["points"] == 0
