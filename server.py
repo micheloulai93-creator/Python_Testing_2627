@@ -38,6 +38,15 @@ def get_competition_by_name(name):
     return next((c for c in competitions if c['name'] == name), None)
 
 
+def parse_places(raw_value):
+    """Convertit la saisie en entier strictement positif, ou retourne None si invalide."""
+    try:
+        value = int(str(raw_value).strip())
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
+
+
 def validate_booking(club, competition, places_required):
     """Vérifie qu'une réservation est autorisée.
 
@@ -84,7 +93,10 @@ def book(competition,club):
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
+    placesRequired = parse_places(request.form.get('places'))
+    if placesRequired is None:
+        flash("Please enter a valid number of places (at least 1).")
+        return render_template('welcome.html', club=club, competitions=competitions)
     error = validate_booking(club, competition, placesRequired)
     if error:
         flash(error)
