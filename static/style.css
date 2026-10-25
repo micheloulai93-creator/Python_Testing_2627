@@ -77,3 +77,34 @@ button:hover, .button:hover { background: #000; }
     background: #e6e6e6;
     border-left: 4px solid var(--accent);
 }
+
+.flash-icon { font-weight: bold; margin-right: 8px; }
+
+/* Succes : fond clair, bordure epaisse */
+.flash-success {
+    background: #f7f7f7;
+    border: 2px solid #333;
+    border-left-width: 8px;
+}
+
+/* Erreur : fond fonce, texte clair */
+.flash-error {
+    background: #333;
+    color: #fff;
+    border-left: 8px solid #000;
+}
+.flash-icon { font-weight: bold; margin-right: 8px; }
+
+/* Succes : fond clair, bordure epaisse */
+.flash-success {
+    background: #f7f7f7;
+    border: 2px solid #333;
+    border-left-width: 8px;
+}
+
+/* Erreur : fond fonce, texte clair */
+.flash-error {
+    background: #333;
+    color: #fff;
+    border-left: 8px solid #000;
+}
