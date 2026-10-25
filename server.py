@@ -22,6 +22,9 @@ clubs = loadClubs()
 
 MAX_PLACES_PER_CLUB = 12
 
+# Places deja reservees : {(nom_competition, nom_club): nombre}
+bookings = {}
+
 
 def get_club_by_email(email):
     """Retourne le club correspondant à l'email, ou None s'il n'existe pas."""
@@ -47,12 +50,13 @@ def parse_places(raw_value):
     return value if value > 0 else None
 
 
-def validate_booking(club, competition, places_required):
+def validate_booking(club, competition, places_required, already_booked=0):
     """Vérifie qu'une réservation est autorisée.
 
+    already_booked : places déjà réservées par ce club dans cette compétition.
     Retourne un message d'erreur (str) si elle est refusée, sinon None.
     """
-    if places_required > MAX_PLACES_PER_CLUB:
+    if already_booked + places_required > MAX_PLACES_PER_CLUB:
         return "You cannot book more than 12 places in a competition."
     if int(competition['numberOfPlaces']) <= 0:
         return "This competition is full."
@@ -103,12 +107,14 @@ def purchasePlaces():
     if placesRequired is None:
         flash("Please enter a valid number of places (at least 1).")
         return render_template('welcome.html', club=club, competitions=competitions)
-    error = validate_booking(club, competition, placesRequired)
+    key = (competition['name'], club['name'])
+    error = validate_booking(club, competition, placesRequired, bookings.get(key, 0))
     if error:
         flash(error)
         return render_template('welcome.html', club=club, competitions=competitions)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     club['points'] = int(club['points'])-placesRequired
+    bookings[key] = bookings.get(key, 0) + placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
 

@@ -159,3 +159,30 @@ def test_achat_competition_inconnue_ne_plante_pas(client):
 def test_achat_sans_champs_ne_plante_pas(client):
     reponse = client.post("/purchasePlaces", data={})
     assert reponse.status_code == 302
+    
+
+
+# --- Bug 9 : limite de 12 places cumulee ---
+
+def test_cumul_de_plusieurs_achats_limite_a_12(client):
+    server.get_club_by_name("Simply Lift")["points"] = "20"
+    acheter(client, "Simply Lift", "Spring Festival", 8)
+    reponse = acheter(client, "Simply Lift", "Spring Festival", 5)
+    assert b"more than 12" in reponse.data
+    assert server.get_club_by_name("Simply Lift")["points"] == 12
+
+
+def test_limite_de_12_est_par_competition(client):
+    server.get_club_by_name("Simply Lift")["points"] = "30"
+    server.get_competition_by_name("Sold Out Cup")["numberOfPlaces"] = "20"
+    acheter(client, "Simply Lift", "Spring Festival", 12)
+    reponse = acheter(client, "Simply Lift", "Sold Out Cup", 5)
+    assert b"Great-booking complete!" in reponse.data
+
+
+def test_limite_de_12_est_par_club(client):
+    server.get_club_by_name("Simply Lift")["points"] = "30"
+    server.get_club_by_name("She Lifts")["points"] = "20"
+    acheter(client, "Simply Lift", "Spring Festival", 12)
+    reponse = acheter(client, "She Lifts", "Spring Festival", 12)
+    assert b"Great-booking complete!" in reponse.data
