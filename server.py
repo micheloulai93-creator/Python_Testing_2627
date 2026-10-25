@@ -94,7 +94,7 @@ def index():
 def showSummary():
     club = get_club_by_email(request.form.get('email', ''))
     if club is None:
-        flash("Sorry, that email was not found.")
+        flash("Sorry, that email was not found.", "error")
         return redirect(url_for('index'))
     return render_template('welcome.html',club=club,competitions=competitions)
 
@@ -104,13 +104,13 @@ def book(competition,club):
     foundClub = get_club_by_name(club)
     foundCompetition = get_competition_by_name(competition)
     if foundClub is None:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return redirect(url_for('index'))
     if foundCompetition is None:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
     if is_competition_over(foundCompetition):
-        flash("This competition is already over.")
+        flash("This competition is already over.", "error")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
     return render_template('booking.html',club=foundClub,competition=foundCompetition)
 
@@ -120,24 +120,24 @@ def purchasePlaces():
     competition = get_competition_by_name(request.form.get('competition'))
     club = get_club_by_name(request.form.get('club'))
     if club is None:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return redirect(url_for('index'))
     if competition is None:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return render_template('welcome.html', club=club, competitions=competitions)
     placesRequired = parse_places(request.form.get('places'))
     if placesRequired is None:
-        flash("Please enter a valid number of places (at least 1).")
+        flash("Please enter a valid number of places (at least 1).", "error")
         return render_template('welcome.html', club=club, competitions=competitions)
     key = (competition['name'], club['name'])
     error = validate_booking(club, competition, placesRequired, bookings.get(key, 0))
     if error:
-        flash(error)
+        flash(error, "error")
         return render_template('welcome.html', club=club, competitions=competitions)
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     club['points'] = int(club['points'])-placesRequired
     bookings[key] = bookings.get(key, 0) + placesRequired
-    flash('Great-booking complete!')
+    flash('Great-booking complete!', "success")
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
