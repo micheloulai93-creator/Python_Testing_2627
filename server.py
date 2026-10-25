@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 
@@ -41,6 +42,22 @@ def get_competition_by_name(name):
     return next((c for c in competitions if c['name'] == name), None)
 
 
+def is_competition_over(competition, now=None):
+    """True si la date de la compétition est passée (date illisible = considérée passée)."""
+    now = now or datetime.now()
+    try:
+        date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
+    except (KeyError, ValueError):
+        return True
+    return date < now
+
+
+@app.context_processor
+def inject_helpers():
+    """Rend is_competition_over() utilisable dans les templates (is_over)."""
+    return {'is_over': is_competition_over}
+
+
 def parse_places(raw_value):
     """Convertit la saisie en entier strictement positif, ou retourne None si invalide."""
     try:
@@ -56,6 +73,8 @@ def validate_booking(club, competition, places_required, already_booked=0):
     already_booked : places déjà réservées par ce club dans cette compétition.
     Retourne un message d'erreur (str) si elle est refusée, sinon None.
     """
+    if is_competition_over(competition):
+        return "This competition is already over."
     if already_booked + places_required > MAX_PLACES_PER_CLUB:
         return "You cannot book more than 12 places in a competition."
     if int(competition['numberOfPlaces']) <= 0:
@@ -89,6 +108,9 @@ def book(competition,club):
         return redirect(url_for('index'))
     if foundCompetition is None:
         flash("Something went wrong-please try again")
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
+    if is_competition_over(foundCompetition):
+        flash("This competition is already over.")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
     return render_template('booking.html',club=foundClub,competition=foundCompetition)
 
