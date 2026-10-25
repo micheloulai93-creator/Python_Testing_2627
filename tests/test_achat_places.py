@@ -139,3 +139,23 @@ def test_achat_sans_champ_places_ne_plante_pas(client):
                           data={"club": "Simply Lift", "competition": "Spring Festival"})
     assert reponse.status_code == 200
     assert b"valid number of places" in reponse.data
+
+
+# --- Bug 8 : club ou competition inconnu dans le formulaire ---
+
+def test_achat_club_inconnu_ne_plante_pas(client):
+    reponse = acheter(client, "Fantome", "Spring Festival", 2)
+    assert reponse.status_code == 302
+    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+
+
+def test_achat_competition_inconnue_ne_plante_pas(client):
+    reponse = acheter(client, "Simply Lift", "Fantome", 2)
+    assert reponse.status_code == 200
+    assert b"Something went wrong" in reponse.data
+    assert server.get_club_by_name("Simply Lift")["points"] == "13"
+
+
+def test_achat_sans_champs_ne_plante_pas(client):
+    reponse = client.post("/purchasePlaces", data={})
+    assert reponse.status_code == 302
