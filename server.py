@@ -91,8 +91,14 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    competition = get_competition_by_name(request.form.get('competition'))
+    club = get_club_by_name(request.form.get('club'))
+    if club is None:
+        flash("Something went wrong-please try again")
+        return redirect(url_for('index'))
+    if competition is None:
+        flash("Something went wrong-please try again")
+        return render_template('welcome.html', club=club, competitions=competitions)
     placesRequired = parse_places(request.form.get('places'))
     if placesRequired is None:
         flash("Please enter a valid number of places (at least 1).")
