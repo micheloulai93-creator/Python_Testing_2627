@@ -1,0 +1,79 @@
+:root {
+    --bg: #f2f2f2;
+    --text: #222;
+    --muted: #666;
+    --border: #bbb;
+    --card: #fff;
+    --accent: #333;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background: var(--accent);
+    color: #fff;
+}
+
+.brand { font-weight: bold; letter-spacing: 2px; }
+.nav-link { color: #fff; }
+
+.container {
+    max-width: 720px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.competitions { list-style: none; padding: 0; }
+.points { font-size: 1.1em; font-weight: bold; }
+
+label { display: inline-block; margin-right: 8px; }
+
+input {
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+button, .button {
+    display: inline-block;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover, .button:hover { background: #000; }
+
+.button { margin-left: 12px; }
+
+.flash-list { list-style: none; padding: 0; }
+
+.flash {
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #e6e6e6;
+    border-left: 4px solid var(--accent);
+}
