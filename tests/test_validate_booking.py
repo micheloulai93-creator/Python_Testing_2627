@@ -35,3 +35,14 @@ def test_competition_complete_refusee():
 
 def test_exactement_les_places_restantes_autorise():
     assert server.validate_booking(club(12), competition(3), 3) is None
+
+
+# --- Bug 9 : la limite de 12 s'applique au cumul des reservations ---
+
+def test_cumul_avec_reservations_precedentes_depasse_12():
+    erreur = server.validate_booking(club(20), competition(30), 5, already_booked=8)
+    assert "more than 12" in erreur
+
+
+def test_cumul_exactement_12_autorise():
+    assert server.validate_booking(club(20), competition(30), 4, already_booked=8) is None
