@@ -5,7 +5,8 @@ import server
 
 def acheter(client, club, competition, places):
     return client.post("/purchasePlaces",
-                       data={"club": club, "competition": competition, "places": places})
+                       data={"club": club, "competition": competition,
+                             "places": places})
 
 
 # --- Bug 3 : les points sont deduits apres une reservation ---
@@ -19,17 +20,19 @@ def test_achat_valide_affiche_confirmation(client):
 def test_achat_deduit_les_points_du_club(client):
     points_avant = int(server.get_club_by_name("Simply Lift")["points"])
     reponse = acheter(client, "Simply Lift", "Spring Festival", 3)
-    assert int(server.get_club_by_name("Simply Lift")["points"]) == points_avant - 3
+    club = server.get_club_by_name("Simply Lift")
+    assert int(club["points"]) == points_avant - 3
     assert ("Points available: %d" % (points_avant - 3)).encode() in reponse.data
 
 
 # --- Bug 4 : points insuffisants ---
 
 def test_achat_refuse_si_points_insuffisants(client):
-    reponse = acheter(client, "Iron Temple", "Spring Festival", 5)  # 4 points seulement
+    reponse = acheter(client, "Iron Temple", "Spring Festival", 5)  # 4 points
     assert b"Not enough points" in reponse.data
     assert server.get_club_by_name("Iron Temple")["points"] == "4"
-    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+    competition = server.get_competition_by_name("Spring Festival")
+    assert competition["numberOfPlaces"] == "25"
 
 
 def test_achat_accepte_si_points_exactement_suffisants(client):
@@ -45,16 +48,18 @@ def test_achat_refuse_plus_de_12_places(client):
     reponse = acheter(client, "Simply Lift", "Spring Festival", 13)
     assert b"more than 12" in reponse.data
     assert server.get_club_by_name("Simply Lift")["points"] == "13"
-    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+    competition = server.get_competition_by_name("Spring Festival")
+    assert competition["numberOfPlaces"] == "25"
 
 
 # --- Bug 6 : surreservation ---
 
 def test_achat_refuse_si_depasse_les_places_disponibles(client):
-    server.get_competition_by_name("Spring Festival")["numberOfPlaces"] = "3"
+    competition = server.get_competition_by_name("Spring Festival")
+    competition["numberOfPlaces"] = "3"
     reponse = acheter(client, "Simply Lift", "Spring Festival", 5)
     assert b"Not enough places available" in reponse.data
-    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "3"
+    assert competition["numberOfPlaces"] == "3"
     assert server.get_club_by_name("Simply Lift")["points"] == "13"
 
 
@@ -67,17 +72,20 @@ def test_achat_refuse_si_competition_complete(client):
 # --- Bug 7 : saisie invalide ---
 
 @pytest.mark.parametrize("saisie", ["", "abc", "0", "-5", "2.5"])
-def test_achat_saisie_invalide_ne_plante_pas_et_ne_modifie_rien(client, saisie):
+def test_achat_saisie_invalide_ne_plante_pas_et_ne_modifie_rien(client,
+                                                                saisie):
     reponse = acheter(client, "Simply Lift", "Spring Festival", saisie)
     assert reponse.status_code == 200
     assert b"valid number of places" in reponse.data
     assert server.get_club_by_name("Simply Lift")["points"] == "13"
-    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+    competition = server.get_competition_by_name("Spring Festival")
+    assert competition["numberOfPlaces"] == "25"
 
 
 def test_achat_sans_champ_places_ne_plante_pas(client):
     reponse = client.post("/purchasePlaces",
-                          data={"club": "Simply Lift", "competition": "Spring Festival"})
+                          data={"club": "Simply Lift",
+                                "competition": "Spring Festival"})
     assert reponse.status_code == 200
     assert b"valid number of places" in reponse.data
 
@@ -87,7 +95,8 @@ def test_achat_sans_champ_places_ne_plante_pas(client):
 def test_achat_club_inconnu_ne_plante_pas(client):
     reponse = acheter(client, "Fantome", "Spring Festival", 2)
     assert reponse.status_code == 302
-    assert server.get_competition_by_name("Spring Festival")["numberOfPlaces"] == "25"
+    competition = server.get_competition_by_name("Spring Festival")
+    assert competition["numberOfPlaces"] == "25"
 
 
 def test_achat_competition_inconnue_ne_plante_pas(client):
@@ -134,5 +143,5 @@ def test_achat_refuse_pour_competition_passee(client):
     reponse = acheter(client, "Simply Lift", "Fall Classic", 2)
     assert b"already over" in reponse.data
     assert server.get_club_by_name("Simply Lift")["points"] == "13"
-    assert server.get_competition_by_name("Fall Classic")["numberOfPlaces"] == "13"
-    
+    competition = server.get_competition_by_name("Fall Classic")
+    assert competition["numberOfPlaces"] == "13"
