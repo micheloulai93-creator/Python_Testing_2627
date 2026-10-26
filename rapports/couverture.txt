@@ -4,16 +4,16 @@ rootdir: C:\Users\SIABA MICHEL OULAI\Downloads\Python_Testing_2627-main (1)\Pyth
 plugins: cov-4.0.0
 collected 85 items
 
-tests\test_achat_places.py ....................                          [ 23%]
-tests\test_clubs.py .....                                                [ 29%]
-tests\test_connexion.py ..                                               [ 31%]
-tests\test_donnees_json.py ..........                                    [ 43%]
-tests\test_html_formulaires.py ...                                       [ 47%]
-tests\test_interface.py .......                                          [ 55%]
-tests\test_page_reservation.py .....                                     [ 61%]
-tests\test_parse_places.py ............                                  [ 75%]
-tests\test_tableau_points.py .......                                     [ 83%]
-tests\test_validate_booking.py ..............                            [100%]
+tests\functional\test_html_formulaires.py ...                            [  3%]
+tests\functional\test_interface.py .......                               [ 11%]
+tests\integration\test_achat_places.py ....................              [ 35%]
+tests\integration\test_connexion.py ..                                   [ 37%]
+tests\integration\test_page_reservation.py .....                         [ 43%]
+tests\integration\test_tableau_points.py .......                         [ 51%]
+tests\unit\test_clubs.py .....                                           [ 57%]
+tests\unit\test_donnees_json.py ..........                               [ 69%]
+tests\unit\test_parse_places.py ............                             [ 83%]
+tests\unit\test_validate_booking.py ..............                       [100%]
 
 ----------- coverage: platform win32, python 3.6.8-final-0 -----------
 Name        Stmts   Miss  Cover   Missing
@@ -23,4 +23,4 @@ server.py      99      0   100%
 TOTAL          99      0   100%
 
 
-============================= 85 passed in 0.57s ==============================
+============================= 85 passed in 0.60s ==============================
