@@ -1,15 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Booking for {{ competition['name'] }} || GUDLFT{% endblock %}
-{% block nav %}<a class="nav-link" href="{{ url_for('logout') }}">Logout</a>{% endblock %}
+
 {% block content %}
-<h2>{{ competition['name'] }}</h2>
-<p>Places available: {{ competition['numberOfPlaces'] }}</p>
-<p class="points">Your points: {{ club['points'] }}</p>
-<form action="{{ url_for('purchasePlaces') }}" method="post" class="card">
-    <input type="hidden" name="club" value="{{ club['name'] }}">
-    <input type="hidden" name="competition" value="{{ competition['name'] }}">
-    <label for="places">How many places?</label>
-    <input type="number" name="places" id="places" min="1" max="12" required/>
-    <button type="submit">Book</button>
-</form>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-custom p-4">
+            <h3 class="text-center mb-4" style="color: #2c3e50;">Réserver des places</h3>
+            <p class="text-center text-muted">Compétition : <strong>{{ competition.name }}</strong></p>
+            <p class="text-center text-muted">Places disponibles : {{ competition.numberOfPlaces }}</p>
+
+            <form action="{{ url_for('purchasePlaces') }}" method="post">
+                <input type="hidden" name="club" value="{{ club.name }}">
+                <input type="hidden" name="competition" value="{{ competition.name }}">
+                
+                <div class="mb-3">
+                    <label for="places" class="form-label text-muted">Nombre de places souhaitées</label>
+                    <input type="number" class="form-control form-control-lg" id="places" name="places" min="1" required>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary-custom text-white">Confirmer la réservation</button>
+                    <a href="{{ url_for('showSummary') }}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

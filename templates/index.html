@@ -1,12 +1,20 @@
 {% extends "base.html" %}
-{% block title %}GUDLFT Registration{% endblock %}
+
 {% block content %}
-<h1>Welcome to the GUDLFT Registration Portal!</h1>
-<p>Please enter your secretary email to continue:</p>
-<form action="{{ url_for('showSummary') }}" method="post" class="card">
-    <label for="email">Email:</label>
-    <input type="email" name="email" id="email" required/>
-    <button type="submit">Enter</button>
-</form>
-<p><a href="{{ url_for('points') }}">View the public points board</a></p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-custom p-4">
+            <h3 class="text-center mb-4" style="color: #2c3e50;">Connexion</h3>
+            <form action="{{ url_for('showSummary') }}" method="post">
+                <div class="mb-3">
+                    <label for="email" class="form-label text-muted">Adresse e-mail du club</label>
+                    <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="ex: john@simplylift.co" required>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary-custom text-white">Se connecter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
