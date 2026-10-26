@@ -2,17 +2,20 @@
 platform win32 -- Python 3.6.8, pytest-7.0.1, pluggy-1.0.0
 rootdir: C:\Users\SIABA MICHEL OULAI\Downloads\Python_Testing_2627-main (1)\Python_Testing_2627-main, configfile: pytest.ini, testpaths: tests
 plugins: cov-4.0.0
-collected 85 items
+collected 148 items
 
-tests\functional\test_html_formulaires.py ...                            [  3%]
-tests\functional\test_interface.py .......                               [ 11%]
-tests\integration\test_achat_places.py ....................              [ 35%]
-tests\integration\test_connexion.py ..                                   [ 37%]
-tests\integration\test_page_reservation.py .....                         [ 43%]
-tests\integration\test_tableau_points.py .......                         [ 51%]
-tests\unit\test_clubs.py .....                                           [ 57%]
-tests\unit\test_donnees_json.py ..........                               [ 69%]
-tests\unit\test_parse_places.py ............                             [ 83%]
+tests\functional\test_html_formulaires.py ...                            [  2%]
+tests\functional\test_interface.py .......                               [  6%]
+tests\integration\test_achat_places.py ....................              [ 20%]
+tests\integration\test_connexion.py ..                                   [ 21%]
+tests\integration\test_page_reservation.py .....                         [ 25%]
+tests\integration\test_tableau_points.py .......                         [ 29%]
+tests\unit\test_clubs.py .....                                           [ 33%]
+tests\unit\test_donnees_json.py ..........                               [ 39%]
+tests\unit\test_parse_places.py ............                             [ 47%]
+tests\unit\test_recherches.py ..............                             [ 57%]
+tests\unit\test_regles_reservation.py .............................      [ 77%]
+tests\unit\test_saisie_et_dates.py ....................                  [ 90%]
 tests\unit\test_validate_booking.py ..............                       [100%]
 
 ----------- coverage: platform win32, python 3.6.8-final-0 -----------
@@ -23,4 +26,4 @@ server.py      99      0   100%
 TOTAL          99      0   100%
 
 
-============================= 85 passed in 0.60s ==============================
+============================= 148 passed in 0.76s =============================
