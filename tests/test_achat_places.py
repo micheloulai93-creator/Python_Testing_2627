@@ -135,3 +135,4 @@ def test_achat_refuse_pour_competition_passee(client):
     assert b"already over" in reponse.data
     assert server.get_club_by_name("Simply Lift")["points"] == "13"
     assert server.get_competition_by_name("Fall Classic")["numberOfPlaces"] == "13"
+    

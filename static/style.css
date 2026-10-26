@@ -93,18 +93,20 @@ button:hover, .button:hover { background: #000; }
     color: #fff;
     border-left: 8px solid #000;
 }
-.flash-icon { font-weight: bold; margin-right: 8px; }
 
-/* Succes : fond clair, bordure epaisse */
-.flash-success {
-    background: #f7f7f7;
-    border: 2px solid #333;
-    border-left-width: 8px;
+/* Tableau public des points */
+.points-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
 }
 
-/* Erreur : fond fonce, texte clair */
-.flash-error {
-    background: #333;
-    color: #fff;
-    border-left: 8px solid #000;
+.points-table th,
+.points-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
 }
+
+.points-table th { background: var(--accent); color: #fff; }
+.points-table .num { text-align: right; font-weight: bold; }
