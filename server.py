@@ -33,27 +33,22 @@ clubs = loadClubs()
 
 MAX_PLACES_PER_CLUB = 12
 
-# Places deja reservees : {(nom_competition, nom_club): nombre}
 bookings = {}
 
 
 def get_club_by_email(email):
-    """Retourne le club correspondant à l'email, ou None s'il n'existe pas."""
     return next((c for c in clubs if c['email'] == email), None)
 
 
 def get_club_by_name(name):
-    """Retourne le club portant ce nom, ou None."""
     return next((c for c in clubs if c['name'] == name), None)
 
 
 def get_competition_by_name(name):
-    """Retourne la compétition portant ce nom, ou None."""
     return next((c for c in competitions if c['name'] == name), None)
 
 
 def is_competition_over(competition, now=None):
-    """True si la compétition est passée (date illisible = passée)."""
     now = now or datetime.now()
     try:
         date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
@@ -64,12 +59,10 @@ def is_competition_over(competition, now=None):
 
 @app.context_processor
 def inject_helpers():
-    """Rend is_competition_over() utilisable dans les templates (is_over)."""
     return {'is_over': is_competition_over}
 
 
 def parse_places(raw_value):
-    """Convertit la saisie en entier strictement positif, ou None."""
     try:
         value = int(str(raw_value).strip())
     except (TypeError, ValueError):
@@ -78,10 +71,6 @@ def parse_places(raw_value):
 
 
 def validate_booking(club, competition, places_required, already_booked=0):
-    """Vérifie qu'une réservation est autorisée.
-    already_booked : places déjà réservées par ce club dans cette compétition.
-    Retourne un message d'erreur (str) si elle est refusée, sinon None.
-    """
     if is_competition_over(competition):
         return "This competition is already over."
     if already_booked + places_required > MAX_PLACES_PER_CLUB:
@@ -100,7 +89,6 @@ def index():
     return render_template('index.html')
 
 
-# CORRECTION 1 : Ajout de la méthode GET pour éviter l'erreur 405 à l'actualisation
 @app.route('/showSummary', methods=['GET', 'POST'])
 def showSummary():
     if request.method == 'POST':
@@ -108,16 +96,13 @@ def showSummary():
         if club is None:
             flash("Sorry, that email was not found.", "error")
             return redirect(url_for('index'))
-        # On enregistre l'email du club dans la session (pour le logout)
         session['email'] = club['email']
         return render_template('welcome.html', club=club, competitions=competitions)
     else:
-        # Si on actualise la page (GET), on recharge le club depuis la session
         if 'email' in session:
             club = get_club_by_email(session['email'])
             if club:
                 return render_template('welcome.html', club=club, competitions=competitions)
-        # Si pas de session, on renvoie à l'accueil
         return redirect(url_for('index'))
 
 
@@ -141,48 +126,42 @@ def book(competition, club):
 def purchasePlaces():
     competition = get_competition_by_name(request.form.get('competition'))
     club = get_club_by_name(request.form.get('club'))
-    
     if club is None:
         flash("Something went wrong-please try again", "error")
         return redirect(url_for('index'))
     if competition is None:
         flash("Something went wrong-please try again", "error")
         return render_template('welcome.html', club=club, competitions=competitions)
-        
+
     placesRequired = parse_places(request.form.get('places'))
     if placesRequired is None:
         flash("Please enter a valid number of places (at least 1).", "error")
         return render_template('welcome.html', club=club, competitions=competitions)
-        
+
     key = (competition['name'], club['name'])
     error = validate_booking(club, competition, placesRequired, bookings.get(key, 0))
-    
     if error:
         flash(error, "error")
         return render_template('welcome.html', club=club, competitions=competitions)
-        
-    # Mise à jour des données en mémoire
+
     competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
     club['points'] = int(club['points']) - placesRequired
     bookings[key] = bookings.get(key, 0) + placesRequired
-    
-    # CORRECTION 2 : Sauvegarde des données dans les fichiers JSON
+
     saveData()
-    
+
     flash('Great-booking complete!', "success")
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
 @app.route('/points')
 def points():
-    """Tableau public, en lecture seule, des points de tous les clubs."""
     ranking = sorted(clubs, key=lambda c: int(c['points']), reverse=True)
     return render_template('points.html', clubs=ranking)
 
 
-# CORRECTION 3 : Le logout supprime la session
 @app.route('/logout')
 def logout():
-    session.clear() # On vide la session
+    session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for('index'))

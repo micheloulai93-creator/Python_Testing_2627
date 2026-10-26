@@ -3,27 +3,17 @@
         {
             "name": "Simply Lift",
             "email": "john@simplylift.co",
-            "points": 13
+            "points": 10
         },
         {
             "name": "Iron Temple",
             "email": "admin@irontemple.com",
-            "points": 4
+            "points": "4"
         },
         {
             "name": "She Lifts",
             "email": "kate@shelifts.co.uk",
-            "points": 12
-        },
-        {
-            "name": "Power House",
-            "email": "contact@powerhouse.fr",
-            "points": 10
-        },
-        {
-            "name": "Barbell Club",
-            "email": "info@barbellclub.com",
-            "points": 8
+            "points": "12"
         }
     ]
 }
