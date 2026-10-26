@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Club points | GUDLFT{% endblock %}
+{% block nav %}<a class="nav-link" href="{{ url_for('index') }}">Home</a>{% endblock %}
+{% block content %}
+<h2>Club points</h2>
+<p>Public board, updated after every booking.</p>
+<table class="points-table">
+    <thead>
+        <tr><th>Club</th><th>Points</th></tr>
+    </thead>
+    <tbody>
+        {% for club in clubs %}
+        <tr><td>{{ club['name'] }}</td><td class="num">{{ club['points'] }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
