@@ -1,7 +1,8 @@
 import json
 from datetime import datetime
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import (Flask, flash, redirect, render_template, request,
+                   session, url_for)
 
 
 def loadClubs():
@@ -14,6 +15,14 @@ def loadCompetitions():
     with open('competitions.json') as comps:
         listOfCompetitions = json.load(comps)['competitions']
         return listOfCompetitions
+
+
+def saveData():
+    """Sauvegarde les données modifiées dans les fichiers JSON."""
+    with open('clubs.json', 'w') as c:
+        json.dump({'clubs': clubs}, c, indent=4)
+    with open('competitions.json', 'w') as comps:
+        json.dump({'competitions': competitions}, comps, indent=4)
 
 
 app = Flask(__name__)
@@ -70,7 +79,6 @@ def parse_places(raw_value):
 
 def validate_booking(club, competition, places_required, already_booked=0):
     """Vérifie qu'une réservation est autorisée.
-
     already_booked : places déjà réservées par ce club dans cette compétition.
     Retourne un message d'erreur (str) si elle est refusée, sinon None.
     """
@@ -92,14 +100,25 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/showSummary', methods=['POST'])
+# CORRECTION 1 : Ajout de la méthode GET pour éviter l'erreur 405 à l'actualisation
+@app.route('/showSummary', methods=['GET', 'POST'])
 def showSummary():
-    club = get_club_by_email(request.form.get('email', ''))
-    if club is None:
-        flash("Sorry, that email was not found.", "error")
+    if request.method == 'POST':
+        club = get_club_by_email(request.form.get('email', ''))
+        if club is None:
+            flash("Sorry, that email was not found.", "error")
+            return redirect(url_for('index'))
+        # On enregistre l'email du club dans la session (pour le logout)
+        session['email'] = club['email']
+        return render_template('welcome.html', club=club, competitions=competitions)
+    else:
+        # Si on actualise la page (GET), on recharge le club depuis la session
+        if 'email' in session:
+            club = get_club_by_email(session['email'])
+            if club:
+                return render_template('welcome.html', club=club, competitions=competitions)
+        # Si pas de session, on renvoie à l'accueil
         return redirect(url_for('index'))
-    return render_template('welcome.html', club=club,
-                           competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
@@ -111,46 +130,47 @@ def book(competition, club):
         return redirect(url_for('index'))
     if foundCompetition is None:
         flash("Something went wrong-please try again", "error")
-        return render_template('welcome.html', club=foundClub,
-                               competitions=competitions)
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
     if is_competition_over(foundCompetition):
         flash("This competition is already over.", "error")
-        return render_template('welcome.html', club=foundClub,
-                               competitions=competitions)
-    return render_template('booking.html', club=foundClub,
-                           competition=foundCompetition)
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
+    return render_template('booking.html', club=foundClub, competition=foundCompetition)
 
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     competition = get_competition_by_name(request.form.get('competition'))
     club = get_club_by_name(request.form.get('club'))
+    
     if club is None:
         flash("Something went wrong-please try again", "error")
         return redirect(url_for('index'))
     if competition is None:
         flash("Something went wrong-please try again", "error")
-        return render_template('welcome.html', club=club,
-                               competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions)
+        
     placesRequired = parse_places(request.form.get('places'))
     if placesRequired is None:
         flash("Please enter a valid number of places (at least 1).", "error")
-        return render_template('welcome.html', club=club,
-                               competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions)
+        
     key = (competition['name'], club['name'])
-    error = validate_booking(club, competition, placesRequired,
-                             bookings.get(key, 0))
+    error = validate_booking(club, competition, placesRequired, bookings.get(key, 0))
+    
     if error:
         flash(error, "error")
-        return render_template('welcome.html', club=club,
-                               competitions=competitions)
-    competition['numberOfPlaces'] = (int(competition['numberOfPlaces'])
-                                     - placesRequired)
+        return render_template('welcome.html', club=club, competitions=competitions)
+        
+    # Mise à jour des données en mémoire
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
     club['points'] = int(club['points']) - placesRequired
     bookings[key] = bookings.get(key, 0) + placesRequired
+    
+    # CORRECTION 2 : Sauvegarde des données dans les fichiers JSON
+    saveData()
+    
     flash('Great-booking complete!', "success")
-    return render_template('welcome.html', club=club,
-                           competitions=competitions)
+    return render_template('welcome.html', club=club, competitions=competitions)
 
 
 @app.route('/points')
@@ -160,6 +180,9 @@ def points():
     return render_template('points.html', clubs=ranking)
 
 
+# CORRECTION 3 : Le logout supprime la session
 @app.route('/logout')
 def logout():
+    session.clear() # On vide la session
+    flash("You have been logged out.", "success")
     return redirect(url_for('index'))
