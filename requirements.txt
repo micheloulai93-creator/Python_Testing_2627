@@ -7,3 +7,4 @@ Werkzeug==1.0.1
 pytest
 pytest-cov
 flake8
+locust
