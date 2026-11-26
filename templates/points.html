@@ -1,27 +1,91 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <div class="card card-custom p-4">
-            <h3 class="text-center mb-4" style="color: #2c3e50;">Classement des clubs</h3>
-            <table class="table table-hover table-custom">
-                <thead>
-                    <tr>
-                        <th>Club</th>
-                        <th class="text-end">Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for c in clubs %}
-                    <tr>
-                        <td class="align-middle">{{ c.name }}</td>
-                        <td class="text-end align-middle fw-bold">{{ c.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="row justify-content-center mt-2">
+    <div class="col-lg-9">
+        
+        <!-- En-tête -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold mb-2" style="font-size: 2.5rem; letter-spacing: -1px; color: var(--text-main);">Classement des clubs</h1>
+            <p class="text-muted fs-5">Consultez le total de points de chaque club en toute transparence.</p>
+            
+            <!-- Bouton Export CSV -->
+            <a href="{{ url_for('export_csv') }}" class="btn btn-outline-primary rounded-pill px-4 mt-2 fw-medium">
+                <svg class="me-2 mb-1" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Exporter en CSV
+            </a>
         </div>
+
+        <!-- Podium Top 3 -->
+        <div class="row justify-content-center align-items-end mb-5" style="min-height: 250px;">
+            <!-- 2ème place -->
+            {% if clubs|length > 1 %}
+            <div class="col-4 text-center">
+                <div class="card border-0 shadow-sm mx-auto mb-3" style="width: 80px; height: 80px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                    <span class="fs-3 fw-bold text-secondary">{{ clubs[1].points }}</span>
+                </div>
+                <div class="card border-0 shadow-sm py-3 px-2" style="border-top: 4px solid #cbd5e1 !important;">
+                    <h6 class="fw-bold mb-0 text-truncate">{{ clubs[1].name }}</h6>
+                    <small class="text-muted">2ème</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 1ère place -->
+            {% if clubs|length > 0 %}
+            <div class="col-4 text-center">
+                <div class="card border-0 shadow mx-auto mb-3" style="width: 100px; height: 100px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; border: 3px solid #f59e0b;">
+                    <span class="fs-2 fw-bold" style="color: #b45309;">{{ clubs[0].points }}</span>
+                </div>
+                <div class="card border-0 shadow py-4 px-2" style="border-top: 4px solid #f59e0b !important;">
+                    <h5 class="fw-bold mb-0 text-truncate">{{ clubs[0].name }}</h5>
+                    <small class="text-warning fw-bold">1er</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 3ème place -->
+            {% if clubs|length > 2 %}
+            <div class="col-4 text-center">
+                <div class="card border-0 shadow-sm mx-auto mb-3" style="width: 80px; height: 80px; border-radius: 50%; background: #ffedd5; display: flex; align-items: center; justify-content: center;">
+                    <span class="fs-3 fw-bold" style="color: #9a3412;">{{ clubs[2].points }}</span>
+                </div>
+                <div class="card border-0 shadow-sm py-3 px-2" style="border-top: 4px solid #f97316 !important;">
+                    <h6 class="fw-bold mb-0 text-truncate">{{ clubs[2].name }}</h6>
+                    <small class="text-muted">3ème</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tableau pour les autres clubs -->
+        {% if clubs|length > 3 %}
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" style="vertical-align: middle;">
+                    <thead style="background-color: #f8fafc;">
+                        <tr>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0">Position</th>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0">Club</th>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0 text-end">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in clubs[3:] %}
+                        <tr>
+                            <td class="py-3 px-4 text-muted fw-bold border-light">{{ loop.index + 3 }}</td>
+                            <td class="py-3 px-4 fw-bold text-dark border-light">{{ c.name }}</td>
+                            <td class="py-3 px-4 text-end border-light">
+                                <span class="fs-5 fw-bold" style="color: var(--primary);">{{ c.points }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}

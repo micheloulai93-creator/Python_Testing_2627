@@ -1,28 +1,37 @@
 import json
+import csv
+import io
 from datetime import datetime
 
 from flask import (Flask, flash, redirect, render_template, request,
-                   session, url_for)
+                   session, url_for, Response)
 
 
 def loadClubs():
     with open('clubs.json') as c:
-        listOfClubs = json.load(c)['clubs']
-        return listOfClubs
+        return json.load(c)['clubs']
 
 
 def loadCompetitions():
     with open('competitions.json') as comps:
-        listOfCompetitions = json.load(comps)['competitions']
-        return listOfCompetitions
+        return json.load(comps)['competitions']
+
+
+def loadBookings():
+    try:
+        with open('bookings.json') as b:
+            return json.load(b)
+    except FileNotFoundError:
+        return {}
 
 
 def saveData():
-    """Sauvegarde les données modifiées dans les fichiers JSON."""
     with open('clubs.json', 'w') as c:
         json.dump({'clubs': clubs}, c, indent=4)
     with open('competitions.json', 'w') as comps:
         json.dump({'competitions': competitions}, comps, indent=4)
+    with open('bookings.json', 'w') as b:
+        json.dump(bookings, b, indent=4)
 
 
 app = Flask(__name__)
@@ -30,10 +39,9 @@ app.secret_key = 'something_special'
 
 competitions = loadCompetitions()
 clubs = loadClubs()
+bookings = loadBookings()
 
 MAX_PLACES_PER_CLUB = 12
-
-bookings = {}
 
 
 def get_club_by_email(email):
@@ -97,61 +105,89 @@ def showSummary():
             flash("Sorry, that email was not found.", "error")
             return redirect(url_for('index'))
         session['email'] = club['email']
-        return render_template('welcome.html', club=club, competitions=competitions)
     else:
-        if 'email' in session:
-            club = get_club_by_email(session['email'])
-            if club:
-                return render_template('welcome.html', club=club, competitions=competitions)
-        return redirect(url_for('index'))
+        if 'email' not in session:
+            return redirect(url_for('index'))
+        club = get_club_by_email(session['email'])
+        if club is None:
+            return redirect(url_for('index'))
+
+    competitions_triees = sorted(competitions, key=lambda x: x['date'],
+                                 reverse=True)
+    a_venir = [c for c in competitions_triees if not is_competition_over(c)]
+    passees = [c for c in competitions_triees if is_competition_over(c)]
+    competitions_finales = a_venir + passees
+
+    favoris = club.get('favorites', [])
+
+    return render_template('welcome.html', club=club,
+                           competitions=competitions_finales, favoris=favoris)
 
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
+    if 'email' not in session:
+        flash("Please log in first.", "error")
+        return redirect(url_for('index'))
+
     foundClub = get_club_by_name(club)
     foundCompetition = get_competition_by_name(competition)
+
     if foundClub is None:
         flash("Something went wrong-please try again", "error")
-        return redirect(url_for('index'))
+        return redirect(url_for('showSummary'))
+
+    if foundClub['email'] != session['email']:
+        flash("You can only book for your own club.", "error")
+        return redirect(url_for('showSummary'))
+
     if foundCompetition is None:
         flash("Something went wrong-please try again", "error")
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
+        return redirect(url_for('showSummary'))
+
     if is_competition_over(foundCompetition):
         flash("This competition is already over.", "error")
-        return render_template('welcome.html', club=foundClub, competitions=competitions)
-    return render_template('booking.html', club=foundClub, competition=foundCompetition)
+        return redirect(url_for('showSummary'))
+
+    return render_template('booking.html', club=foundClub,
+                           competition=foundCompetition)
 
 
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    competition = get_competition_by_name(request.form.get('competition'))
-    club = get_club_by_name(request.form.get('club'))
-    if club is None:
-        flash("Something went wrong-please try again", "error")
+    if 'email' not in session:
+        flash("Please log in first.", "error")
         return redirect(url_for('index'))
-    if competition is None:
+
+    club = get_club_by_email(session['email'])
+    competition = get_competition_by_name(request.form.get('competition'))
+
+    if club is None or competition is None:
         flash("Something went wrong-please try again", "error")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return redirect(url_for('showSummary'))
 
     placesRequired = parse_places(request.form.get('places'))
     if placesRequired is None:
         flash("Please enter a valid number of places (at least 1).", "error")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return redirect(url_for('showSummary'))
 
-    key = (competition['name'], club['name'])
-    error = validate_booking(club, competition, placesRequired, bookings.get(key, 0))
+    key = "%s|%s" % (competition['name'], club['name'])
+    error = validate_booking(club, competition, placesRequired,
+                             bookings.get(key, 0))
     if error:
         flash(error, "error")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return redirect(url_for('showSummary'))
 
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+    competition['numberOfPlaces'] = (int(competition['numberOfPlaces'])
+                                     - placesRequired)
     club['points'] = int(club['points']) - placesRequired
     bookings[key] = bookings.get(key, 0) + placesRequired
 
     saveData()
 
-    flash('Great-booking complete!', "success")
-    return render_template('welcome.html', club=club, competitions=competitions)
+    flash('Great-booking complete! %d places booked.' % placesRequired,
+          "success")
+    return redirect(url_for('showSummary'))
 
 
 @app.route('/points')
@@ -165,3 +201,83 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for('index'))
+
+
+@app.route('/history')
+def history():
+    if 'email' not in session:
+        return redirect(url_for('index'))
+
+    club = get_club_by_email(session['email'])
+    historique = []
+
+    for key, places in bookings.items():
+        comp_name, club_name = key.split('|')
+        if club_name == club['name']:
+            comp = get_competition_by_name(comp_name)
+            if comp:
+                historique.append({
+                    'competition': comp_name,
+                    'date': comp['date'],
+                    'places': places
+                })
+
+    historique = sorted(historique, key=lambda x: x['date'])
+    return render_template('history.html', club=club, historique=historique)
+
+
+@app.route('/export-csv')
+def export_csv():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Club', 'Points'])
+
+    ranking = sorted(clubs, key=lambda c: int(c['points']), reverse=True)
+    for c in ranking:
+        writer.writerow([c['name'], c['points']])
+
+    response = Response(output.getvalue(), mimetype='text/csv')
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=points_clubs.csv"
+    )
+    return response
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'email' not in session:
+        return redirect(url_for('index'))
+
+    club = get_club_by_email(session['email'])
+
+    if request.method == 'POST':
+        new_email = request.form.get('email')
+        if new_email and new_email != club['email']:
+            if get_club_by_email(new_email) is not None:
+                flash("This email is already used by another club.", "error")
+            else:
+                club['email'] = new_email
+                session['email'] = new_email
+                saveData()
+                flash("Profile updated successfully.", "success")
+                return redirect(url_for('profile'))
+
+    return render_template('profile.html', club=club)
+
+
+@app.route('/toggle-favorite/<competition_name>')
+def toggle_favorite(competition_name):
+    if 'email' not in session:
+        return redirect(url_for('index'))
+
+    club = get_club_by_email(session['email'])
+    if 'favorites' not in club:
+        club['favorites'] = []
+
+    if competition_name in club['favorites']:
+        club['favorites'].remove(competition_name)
+    else:
+        club['favorites'].append(competition_name)
+
+    saveData()
+    return redirect(url_for('showSummary'))

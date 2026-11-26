@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- En-tête -->
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h1 class="fw-bold mb-1" style="font-size: 2.2rem; letter-spacing: -1px;">Mon historique</h1>
+                <p class="text-muted mb-0">Retrouvez le détail de toutes vos réservations passées.</p>
+            </div>
+            <a href="{{ url_for('showSummary') }}" class="btn btn-outline-secondary fw-medium rounded-3 px-4">
+                Retour au tableau de bord
+            </a>
+        </div>
+
+        <!-- Cartes de statistiques -->
+        {% if historique %}
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 rounded-4 d-flex flex-row align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
+                        <svg width="28" height="28" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 fw-bold text-uppercase small">Total des places achetées</p>
+                        <h2 class="mb-0 fw-bold text-dark">{{ historique|sum(attribute='places') }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm p-4 rounded-4 d-flex flex-row align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-4">
+                        <svg width="28" height="28" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 fw-bold text-uppercase small">Nombre d'événements</p>
+                        <h2 class="mb-0 fw-bold text-dark">{{ historique|length }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tableau -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            {% if historique %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" style="vertical-align: middle;">
+                    <thead style="background-color: #f8fafc;">
+                        <tr>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0">Compétition</th>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0">Date de l'événement</th>
+                            <th class="py-3 px-4 text-muted fw-bold text-uppercase small border-0 text-end">Places réservées</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in historique %}
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-dark border-light">{{ item.competition }}</td>
+                            <td class="py-3 px-4 text-muted border-light">{{ item.date }}</td>
+                            <td class="py-3 px-4 text-end border-light">
+                                <span class="badge bg-primary bg-opacity-10 text-primary fs-6 rounded-pill px-3 py-2">{{ item.places }} places</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-5 text-center">
+                <div class="mb-3">
+                    <svg width="48" height="48" fill="none" stroke="#cbd5e1" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h4 class="fw-bold text-dark">Aucune réservation</h4>
+                <p class="text-muted mb-4">Vous n'avez pas encore réservé de places pour une compétition.</p>
+                <a href="{{ url_for('showSummary') }}" class="btn btn-primary rounded-3 px-4">Découvrir les compétitions</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

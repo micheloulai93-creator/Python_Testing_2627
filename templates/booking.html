@@ -1,29 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm p-4">
-            <h3 class="text-center mb-4" style="color: #2c3e50;">Réserver des places</h3>
-            <p class="text-center text-muted">Compétition : <strong>{{ competition.name }}</strong></p>
-            <!-- Texte attendu par les tests -->
-            <p class="text-center text-muted">Your points: {{ club.points }}</p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- En-tête de page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url_for('showSummary') }}" class="text-decoration-none text-muted fw-medium d-flex align-items-center">
+                <svg class="me-2" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Retour aux compétitions
+            </a>
+        </div>
 
-            <form action="{{ url_for('purchasePlaces') }}" method="post">
-                <input type="hidden" name="club" value="{{ club.name }}">
-                <input type="hidden" name="competition" value="{{ competition.name }}">
-                
-                <div class="mb-3">
-                    <label for="places" class="form-label text-muted">Nombre de places souhaitées</label>
-                    <!-- Attributs min et max attendus par les tests -->
-                    <input type="number" class="form-control form-control-lg" id="places" name="places" min="1" max="12" required>
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="row g-0">
+                <!-- Colonne de gauche : Détails de l'événement -->
+                <div class="col-md-5 bg-light p-5 d-flex flex-column justify-content-center border-end">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 align-self-start fw-bold">Détails de l'événement</span>
+                    <h1 class="fw-bold mb-4" style="color: #1e293b; font-size: 2.2rem; line-height: 1.2;">{{ competition.name }}</h1>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center text-muted mb-3">
+                            <div class="bg-white p-2 rounded-circle shadow-sm me-3">
+                                <svg width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="d-block small fw-bold text-uppercase">Date</span>
+                                <span class="text-dark fw-medium">{{ competition.date }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-muted">
+                            <div class="bg-white p-2 rounded-circle shadow-sm me-3">
+                                <svg width="20" height="20" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                            <div>
+                                <span class="d-block small fw-bold text-uppercase">Places disponibles</span>
+                                <span class="text-dark fw-medium">{{ competition.numberOfPlaces }} places</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary text-white">Confirmer la réservation</button>
-                    <a href="{{ url_for('showSummary') }}" class="btn btn-outline-secondary">Annuler</a>
+
+                <!-- Colonne de droite : Formulaire -->
+                <div class="col-md-7 p-5 bg-white">
+                    <h3 class="fw-bold mb-4" style="color: #1e293b;">Réserver vos places</h3>
+                    
+                    <div class="alert alert-info border-0 rounded-3 d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-medium">Votre solde actuel</span>
+                        <span class="fs-4 fw-bold">Your points: {{ club.points }}</span>
+                    </div>
+
+                    <form action="{{ url_for('purchasePlaces') }}" method="post">
+                        <input type="hidden" name="club" value="{{ club.name }}">
+                        <input type="hidden" name="competition" value="{{ competition.name }}">
+                        
+                        <div class="mb-4">
+                            <label for="places" class="form-label fw-bold text-muted">Combien de places souhaitez-vous ?</label>
+                            <div class="input-group input-group-lg">
+                                <input type="number" class="form-control text-center fw-bold fs-3 border-2" id="places" name="places" min="1" max="12" placeholder="0" required style="border-radius: 10px 0 0 10px; border-color: #e2e8f0;">
+                                <span class="input-group-text bg-white border-2 border-start-0 text-muted" style="border-radius: 0 10px 10px 0; border-color: #e2e8f0;">places</span>
+                            </div>
+                            <div class="form-text mt-2 text-center text-muted">Maximum 12 places par compétition.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold py-3 shadow-sm">Confirmer la réservation</button>
+                            <a href="{{ url_for('showSummary') }}" class="btn btn-light btn-lg rounded-3 fw-bold py-3">Annuler</a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

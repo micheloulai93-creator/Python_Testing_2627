@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card p-5 border-0" style="max-width: 450px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color: var(--text-main);">Mon Profil</h2>
+            <p class="text-muted">Modifiez les informations de votre club</p>
+        </div>
+        
+        <form action="{{ url_for('profile') }}" method="post">
+            <div class="mb-3">
+                <label class="form-label fw-medium text-muted small">Nom du club</label>
+                <input type="text" class="form-control" value="{{ club.name }}" disabled>
+            </div>
+            <div class="mb-4">
+                <label for="email" class="form-label fw-medium text-muted small">Adresse e-mail</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ club.email }}" required>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                <a href="{{ url_for('showSummary') }}" class="btn btn-light">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

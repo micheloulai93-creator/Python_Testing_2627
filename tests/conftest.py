@@ -20,10 +20,13 @@ COMPETITIONS = [
 
 @pytest.fixture(autouse=True)
 def donnees_de_test(monkeypatch):
-    """Remplace les données du serveur par une copie propre avant chaque test."""
+    """Remplace les données du serveur par une copie propre avant chaque test,
+    et empêche saveData() d'écrire sur le disque pendant les tests."""
     monkeypatch.setattr(server, "clubs", copy.deepcopy(CLUBS))
     monkeypatch.setattr(server, "competitions", copy.deepcopy(COMPETITIONS))
     monkeypatch.setattr(server, "bookings", {})
+    # Empêche l'écriture dans les vrais fichiers JSON
+    monkeypatch.setattr(server, "saveData", lambda: None)
 
 
 @pytest.fixture

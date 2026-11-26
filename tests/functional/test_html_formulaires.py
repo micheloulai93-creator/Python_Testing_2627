@@ -9,6 +9,7 @@ def test_formulaire_connexion_label_lie_au_champ(client):
 
 
 def test_formulaire_reservation_label_lie_au_champ(client):
+    client.post("/showSummary", data={"email": "john@simplylift.co"})
     html = client.get("/book/Spring Festival/Simply Lift").data.decode()
     assert 'id=""' not in html
     assert 'for="places"' in html and 'id="places"' in html
